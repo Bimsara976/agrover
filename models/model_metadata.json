@@ -1,0 +1,17 @@
+{
+  "optimal_k": 2,
+  "features": [
+    "NIR",
+    "SWIR",
+    "NDVI",
+    "NDWI",
+    "EVI",
+    "SAVI"
+  ],
+  "zone_labels": {
+    "0": "Sparse Vegetation",
+    "1": "Bare Soil / Built-up"
+  },
+  "inertia": 258211.32085527063,
+  "n_samples_trained": 120130
+}

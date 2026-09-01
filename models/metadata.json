@@ -1,0 +1,20 @@
+{
+  "feature_cols": [
+    "Nitrogen",
+    "Phosphorus",
+    "Potassium",
+    "Temperature",
+    "Humidity",
+    "pH_Value",
+    "Rainfall"
+  ],
+  "class_names": [
+    "Healthy",
+    "Moderate",
+    "Poor"
+  ],
+  "n_classes": 3,
+  "embedding_dim": 64,
+  "lstm_test_accuracy": 0.9911674347158218,
+  "xgb_test_accuracy": 0.9950076804915514
+}
