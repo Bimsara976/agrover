@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroRover - Farm Intelligence Dashboard</title>
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- TOP NAVIGATION -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>
+    <span class="brand">AgroRover</span>
+    <span class="rover-tag">Rover #1</span>
+  </div>
+  <nav class="topbar-nav">
+    <a class="active" onclick="showPanel('main',this)">Overview</a>
+    <a onclick="showPanel('analytics',this)">Charts</a>
+    <a onclick="showPanel('camera',this)">Camera</a>
+    <a onclick="showPanel('diagnostics',this)">Model Reports</a>
+    <a onclick="showPanel('soil',this)">Soil Health</a>
+    <a onclick="showPanel('anomaly',this)">Anomaly Check</a>
+    <a onclick="showPanel('zone',this)">Field Zone</a>
+    <a onclick="showPanel('disease',this)">Crop Disease</a>
+    <a onclick="showPanel('logs',this)">Activity Log</a>
+  </nav>
+  <div class="topbar-actions">
+    <button id="sim-btn" class="btn-sim" onclick="toggleSimulation()">Start Simulation</button>
+    <button class="btn-manual" onclick="openManualModal()">Enter Readings</button>
+    <a href="/controller" target="_blank" class="btn-controller" title="Open Mobile Rover Controller">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="3"/><circle cx="8" cy="12" r="1.5" fill="currentColor" stroke="none"/><path d="M16 10v4M14 12h4"/></svg>
+      Controller
+    </a>
+  </div>
+</header>
+
+<!-- HEALTH STRIP -->
+<div class="health-strip">
+  <span class="strip-greeting" id="strip-greeting">Good morning</span>
+  <span class="strip-time" id="strip-time">Loading...</span>
+  <div class="strip-divider"></div>
+  <div class="batt-pill">
+    <span class="batt-icon">BAT</span>
+    <div class="batt-track"><div class="batt-fill" id="batt-fill" style="width:87%"></div></div>
+    <span class="batt-pct" id="batt-pct">87%</span>
+  </div>
+  <div class="health-pill hp-good" id="pill-ai">
+    <div><span class="pill-label">AI Models</span><span class="pill-val">Ready</span></div>
+  </div>
+  <div class="health-pill hp-good" id="pill-anomaly">
+    <div><span class="pill-label">Soil Moisture</span><span class="pill-val" id="pill-anomaly-val">Normal</span></div>
+  </div>
+  <div class="health-pill hp-good" id="pill-soil">
+    <div><span class="pill-label">Soil Health</span><span class="pill-val" id="pill-soil-val">Healthy</span></div>
+  </div>
+  <div class="health-pill hp-blue" id="pill-zone">
+    <div><span class="pill-label">Field Zone</span><span class="pill-val" id="pill-zone-val">--</span></div>
+  </div>
+</div>
+
+<!-- OVERVIEW PANEL -->
+<div id="panel-main" class="panel active">
+<div class="main-grid">
+
+  <div class="col-left">
+    <div class="card">
+      <div class="card-title">Rover Status</div>
+      <div class="stat-grid">
+        <div class="stat-row"><span class="stat-label">Drive Mode</span><span class="stat-val" id="mode-val">Idle</span></div>
+        <div class="stat-row"><span class="stat-label">Speed</span><span class="stat-val" id="speed-val">0 km/h</span></div>
+        <div class="stat-row"><span class="stat-label">Distance Covered</span><span class="stat-val" id="trip-dist-left">21.0 km</span></div>
+        <div class="stat-row"><span class="stat-label">GPS Location</span><span class="stat-val gps-text" id="gps-val">7.2096, 79.8358</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Soil Moisture by Depth</div>
+      <div class="depth-bars" id="vw-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Soil Temperature by Depth</div>
+      <div class="depth-bars" id="temp-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">System Check</div>
+      <div class="svc-list" id="svc-list">
+        <div class="svc-item good">All systems normal</div>
+        <div class="svc-item neutral">Awaiting first sensor reading</div>
+      </div>
+      <button class="btn-diag" onclick="runDiagnostics()">Run Full Check</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Moisture Trend - 30 cm</div>
+      <canvas id="mini-chart" height="90"></canvas>
+    </div>
+  </div>
+
+  <div class="col-center">
+    <div class="map-card">
+      <!-- Map header with toggle -->
+      <div class="map-header">
+        <div class="card-title" style="margin-bottom:0">Field Map — Live Rover Position</div>
+        <div class="map-toggle-group">
+          <button class="map-tab active" id="tab-field" onclick="switchMapView('field', this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+            Field View
+          </button>
+          <button class="map-tab" id="tab-satellite" onclick="switchMapView('satellite', this)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Satellite
+          </button>
+        </div>
+      </div>
+
+      <!-- Field canvas view -->
+      <div id="map-field-view">
+        <canvas id="terrain-canvas" width="520" height="270"></canvas>
+      </div>
+
+      <!-- Leaflet satellite/terrain view -->
+      <div id="map-satellite-view" style="display:none;position:relative">
+        <div id="google-map" style="width:100%;height:270px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border)"></div>
+        <div class="gmap-loc-bar" id="gmap-loc-bar">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          <span id="gmap-loc-text">Tap Satellite to load map...</span>
+          <button class="gmap-recenter-btn" onclick="gmapRecenter()" title="Re-center on my location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+            Re-center
+          </button>
+        </div>
+        <div class="gmap-layer-btns">
+          <button class="gmap-layer-btn active" id="layer-satellite" onclick="setMapType('satellite')">Satellite</button>
+          <button class="gmap-layer-btn" id="layer-terrain" onclick="setMapType('terrain')">Terrain</button>
+          <button class="gmap-layer-btn" id="layer-hybrid" onclick="setMapType('hybrid')">Hybrid</button>
+          <button class="gmap-layer-btn" id="layer-street" onclick="setMapType('street')">Street</button>
+        </div>
+      </div>
+
+      <div class="trip-overlay">
+        <div class="trip-row"><span class="trip-lbl">Covered</span><span><span class="trip-num" id="trip-dist">21.0</span> <span class="trip-unit">km</span></span></div>
+        <div class="trip-row"><span class="trip-lbl">Remaining</span><span><span class="trip-num" id="trip-rem">54.3</span> <span class="trip-unit">km</span></span></div>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-header">
+        <div class="card-title" style="margin-bottom:0">Live Sensor Readings</div>
+        <div class="sensor-tabs">
+          <button class="stab active" onclick="switchSensorTab('npk',this)">Soil Nutrients</button>
+          <button class="stab" onclick="switchSensorTab('spectral',this)">Crop Indices</button>
+          <button class="stab" onclick="switchSensorTab('env',this)">Environment</button>
+        </div>
+      </div>
+      <div id="sensor-npk" class="sensor-panel" style="margin-top:14px">
+        <div class="sensor-grid">
+          <div class="sval-card"><span class="sval-label">Nitrogen (N)</span><span class="sval-val" id="s-n">50</span><span class="sval-unit">mg / kg</span></div>
+          <div class="sval-card"><span class="sval-label">Phosphorus (P)</span><span class="sval-val" id="s-p">40</span><span class="sval-unit">mg / kg</span></div>
+          <div class="sval-card"><span class="sval-label">Potassium (K)</span><span class="sval-val" id="s-k">60</span><span class="sval-unit">mg / kg</span></div>
+          <div class="sval-card"><span class="sval-label">Soil pH</span><span class="sval-val" id="s-ph">6.8</span><span class="sval-unit">neutral range</span></div>
+          <div class="sval-card"><span class="sval-label">Rainfall</span><span class="sval-val" id="s-rain">120</span><span class="sval-unit">mm</span></div>
+          <div class="sval-card"><span class="sval-label">Humidity</span><span class="sval-val" id="s-hum">65</span><span class="sval-unit">%</span></div>
+        </div>
+      </div>
+      <div id="sensor-spectral" class="sensor-panel" style="display:none;margin-top:14px">
+        <div class="sensor-grid">
+          <div class="sval-card"><span class="sval-label">Vegetation (NDVI)</span><span class="sval-val" id="s-ndvi">0.55</span><span class="sval-unit">healthy &gt; 0.4</span></div>
+          <div class="sval-card"><span class="sval-label">Water Index (NDWI)</span><span class="sval-val" id="s-ndwi">0.10</span><span class="sval-unit">moisture level</span></div>
+          <div class="sval-card"><span class="sval-label">Canopy (EVI)</span><span class="sval-val" id="s-evi">0.40</span><span class="sval-unit">enhanced veg</span></div>
+          <div class="sval-card"><span class="sval-label">Soil-Adj (SAVI)</span><span class="sval-val" id="s-savi">0.45</span><span class="sval-unit">soil adjusted</span></div>
+          <div class="sval-card"><span class="sval-label">Near Infrared</span><span class="sval-val" id="s-nir">0.65</span><span class="sval-unit">NIR reflectance</span></div>
+          <div class="sval-card"><span class="sval-label">Shortwave IR</span><span class="sval-val" id="s-swir">0.30</span><span class="sval-unit">SWIR reflectance</span></div>
+        </div>
+      </div>
+      <div id="sensor-env" class="sensor-panel" style="display:none;margin-top:14px">
+        <div class="sensor-grid">
+          <div class="sval-card"><span class="sval-label">Temp at 30 cm</span><span class="sval-val" id="s-t30">24.5</span><span class="sval-unit">deg C</span></div>
+          <div class="sval-card"><span class="sval-label">Temp at 60 cm</span><span class="sval-val" id="s-t60">23.0</span><span class="sval-unit">deg C</span></div>
+          <div class="sval-card"><span class="sval-label">Temp at 90 cm</span><span class="sval-val" id="s-t90">21.8</span><span class="sval-unit">deg C</span></div>
+          <div class="sval-card"><span class="sval-label">Moisture at 30 cm</span><span class="sval-val" id="s-vw30">0.28</span><span class="sval-unit">volumetric</span></div>
+          <div class="sval-card"><span class="sval-label">Moisture at 60 cm</span><span class="sval-val" id="s-vw60">0.25</span><span class="sval-unit">volumetric</span></div>
+          <div class="sval-card"><span class="sval-label">Moisture at 90 cm</span><span class="sval-val" id="s-vw90">0.22</span><span class="sval-unit">volumetric</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-right">
+    <div class="card ai-card">
+      <div class="card-title">AI Analysis Summary</div>
+      <div class="radar-wrap">
+        <canvas id="radar-canvas" width="130" height="130"></canvas>
+        <div class="radar-label" id="radar-label">NORMAL</div>
+      </div>
+      <div class="ai-results">
+        <div class="ai-row"><span class="ai-row-label">Moisture Risk</span><div class="score-track"><div class="score-fill" id="score-fill" style="width:5%"></div></div><span class="ai-row-val" id="score-val">Low</span></div>
+        <div class="ai-row"><span class="ai-row-label">Field Zone</span><span class="ai-row-val" id="ai-zone">Sparse Vegetation</span></div>
+        <div class="ai-row"><span class="ai-row-label">Soil Health</span><span class="ai-row-val" id="ai-soil">Healthy</span></div>
+        <div class="ai-row"><span class="ai-row-label">Confidence</span><span class="ai-row-val" id="ai-conf">92%</span></div>
+      </div>
+    </div>
+    <div class="card cam-card">
+      <div class="card-title">Camera</div>
+      <div class="cam-source-row">
+        <select id="cam-type" onchange="updateCamSource()">
+          <option value="webcam">Webcam</option>
+          <option value="droidcam">Phone (DroidCam WiFi)</option>
+          <option value="url">Custom IP Camera</option>
+        </select>
+        <input id="cam-url" placeholder="192.168.x.x:4747" style="display:none" />
+        <button class="btn-cam-connect" onclick="connectCamera()">Connect</button>
+      </div>
+      <div class="cam-viewport">
+        <video id="cam-video" autoplay muted playsinline></video>
+        <img id="cam-img" style="display:none" />
+        <div class="cam-no-signal" id="cam-overlay">
+          <span class="ns-text">Camera not connected</span>
+          <span class="ns-sub">Select a source above</span>
+        </div>
+      </div>
+      <div class="cam-status-row" id="cam-status">Not connected</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- CHARTS PANEL -->
+<div id="panel-analytics" class="panel">
+  <div class="analytics-grid">
+    <div class="card"><div class="card-title">Soil Moisture Over Time - 30 cm</div><canvas id="chart-moisture" height="120"></canvas></div>
+    <div class="card"><div class="card-title">Soil Temperature Over Time - 30 cm</div><canvas id="chart-temp" height="120"></canvas></div>
+    <div class="card"><div class="card-title">Vegetation Index (NDVI) Over Time</div><canvas id="chart-ndvi" height="120"></canvas></div>
+    <div class="card"><div class="card-title">Soil Nutrients (N, P, K) Over Time</div><canvas id="chart-npk" height="120"></canvas></div>
+  </div>
+</div>
+
+<!-- CAMERA PANEL -->
+<div id="panel-camera" class="panel">
+  <div class="cam-full-layout">
+    <div class="cam-full-controls">
+      <div class="card">
+        <div class="card-title">Camera Setup</div>
+        <div class="cam-setup-grid">
+          <div class="setup-field">
+            <label>Camera Source</label>
+            <select id="cam-type-full" onchange="updateCamSourceFull()">
+              <option value="webcam">Built-in Webcam</option>
+              <option value="droidcam">Phone via DroidCam (WiFi)</option>
+              <option value="url">IP Camera / Custom URL</option>
+            </select>
+          </div>
+          <div id="droidcam-help" class="cam-help-box" style="display:none">
+            <strong>How to connect your phone:</strong>
+            <ol>
+              <li>Install the DroidCam app on your phone</li>
+              <li>Make sure your phone and this computer are on the same WiFi network</li>
+              <li>Enter your phone IP address and port below</li>
+            </ol>
+            <input id="cam-url-full" placeholder="e.g. 192.168.1.100:4747" class="url-input" />
+          </div>
+          <div id="url-help" style="display:none">
+            <input id="cam-url-custom" placeholder="http://... or rtsp://..." class="url-input" />
+          </div>
+          <button class="btn-connect-full" onclick="connectCameraFull()">Connect Camera</button>
+          <button class="btn-disconnect" onclick="disconnectCamera()">Disconnect</button>
+        </div>
+        <div class="cam-meta-grid">
+          <div class="cam-meta-row"><span class="cm-lbl">Status</span><span class="cm-val" id="cam-info-status">Not connected</span></div>
+          <div class="cam-meta-row"><span class="cm-lbl">Resolution</span><span class="cm-val" id="cam-info-res">--</span></div>
+          <div class="cam-meta-row"><span class="cm-lbl">Frame rate</span><span class="cm-val" id="cam-info-fps">--</span></div>
+          <div class="cam-meta-row"><span class="cm-lbl">Source type</span><span class="cm-val" id="cam-info-src">None</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Capture Photo</div>
+        <button class="btn-capture" onclick="captureFrame()">Take a Photo</button>
+        <div id="captured-frames" class="frame-gallery"></div>
+      </div>
+    </div>
+    <div class="cam-full-view">
+      <video id="cam-video-full" autoplay muted playsinline></video>
+      <img id="cam-img-full" style="display:none" />
+      <div class="cam-full-overlay" id="cam-overlay-full">
+        <span class="ns-text">No Camera Signal</span>
+        <span class="ns-sub">Configure a camera source on the left</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODEL REPORTS PANEL -->
+<div id="panel-diagnostics" class="panel">
+  <div class="diag-grid">
+    <div class="card"><div class="card-title">Anomaly Detection Model - Training Reports</div><div class="output-gallery" id="c1-gallery"></div></div>
+    <div class="card"><div class="card-title">Field Zone Mapping Model - Training Reports</div><div class="output-gallery" id="c3-gallery"></div></div>
+    <div class="card"><div class="card-title">Soil Health Model - Training Reports</div><div class="output-gallery" id="c4-gallery"></div></div>
+  </div>
+</div>
+
+<!-- SOIL HEALTH PANEL -->
+<div id="panel-soil" class="panel">
+  <div class="inference-layout">
+    <div class="card">
+      <div class="card-title">Soil Health Check</div>
+      <p class="panel-desc">Enter your soil test values below. The AI will classify the soil as Healthy, Moderate, or Poor using the trained LSTM and XGBoost model.</p>
+      <div class="form-grid">
+        <div class="form-field"><label>Nitrogen (N) - mg/kg</label><input type="number" id="f-n" value="50" min="0" max="140"></div>
+        <div class="form-field"><label>Phosphorus (P) - mg/kg</label><input type="number" id="f-p" value="40" min="0" max="145"></div>
+        <div class="form-field"><label>Potassium (K) - mg/kg</label><input type="number" id="f-k" value="60" min="0" max="205"></div>
+        <div class="form-field"><label>Soil Temperature (deg C)</label><input type="number" id="f-temp" value="26" step="0.1"></div>
+        <div class="form-field"><label>Humidity (%)</label><input type="number" id="f-hum" value="65" step="0.1"></div>
+        <div class="form-field"><label>Soil pH</label><input type="number" id="f-ph" value="6.8" step="0.1" min="3" max="9"></div>
+        <div class="form-field"><label>Rainfall (mm)</label><input type="number" id="f-rain" value="120" step="0.1"></div>
+      </div>
+      <button class="btn-predict" onclick="predictSoil()">Check Soil Health</button>
+      <button class="btn-fill-sim" onclick="fillFromSim('soil')">Use Current Sensor Values</button>
+    </div>
+    <div class="card" id="soil-result">
+      <div class="card-title">Result</div>
+      <div class="result-placeholder">Enter your soil values on the left and click Check Soil Health</div>
+    </div>
+  </div>
+</div>
+
+<!-- ANOMALY PANEL -->
+<div id="panel-anomaly" class="panel">
+  <div class="inference-layout">
+    <div class="card">
+      <div class="card-title">Moisture Anomaly Detector</div>
+      <p class="panel-desc">Enter soil moisture and temperature readings at each depth. The AI will detect whether the pattern is Normal or an Anomaly.</p>
+      <div class="form-grid">
+        <div class="form-field"><label>Moisture at 30 cm (VW)</label><input type="number" id="a-vw30" value="0.28" step="0.01"></div>
+        <div class="form-field"><label>Moisture at 60 cm (VW)</label><input type="number" id="a-vw60" value="0.25" step="0.01"></div>
+        <div class="form-field"><label>Moisture at 90 cm (VW)</label><input type="number" id="a-vw90" value="0.22" step="0.01"></div>
+        <div class="form-field"><label>Moisture at 120 cm (VW)</label><input type="number" id="a-vw120" value="0.20" step="0.01"></div>
+        <div class="form-field"><label>Moisture at 150 cm (VW)</label><input type="number" id="a-vw150" value="0.18" step="0.01"></div>
+        <div class="form-field"><label>Temperature at 30 cm (deg C)</label><input type="number" id="a-t30" value="24.5" step="0.1"></div>
+        <div class="form-field"><label>Temperature at 60 cm (deg C)</label><input type="number" id="a-t60" value="23.0" step="0.1"></div>
+        <div class="form-field"><label>Temperature at 90 cm (deg C)</label><input type="number" id="a-t90" value="21.8" step="0.1"></div>
+        <div class="form-field"><label>Temperature at 120 cm (deg C)</label><input type="number" id="a-t120" value="20.5" step="0.1"></div>
+        <div class="form-field"><label>Temperature at 150 cm (deg C)</label><input type="number" id="a-t150" value="19.2" step="0.1"></div>
+      </div>
+      <button class="btn-predict" onclick="predictAnomaly()">Check for Anomaly</button>
+      <button class="btn-fill-sim" onclick="fillFromSim('anomaly')">Use Current Sensor Values</button>
+    </div>
+    <div class="card" id="anomaly-result">
+      <div class="card-title">Result</div>
+      <div class="result-placeholder">Enter readings on the left and click Check for Anomaly</div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE PANEL -->
+<div id="panel-zone" class="panel">
+  <div class="inference-layout">
+    <div class="card">
+      <div class="card-title">Field Zone Classifier</div>
+      <p class="panel-desc">Enter spectral index readings from the rover sensors. The AI will identify which type of field zone the rover is currently in.</p>
+      <div class="form-grid">
+        <div class="form-field"><label>Vegetation Index (NDVI)</label><input type="number" id="z-ndvi" value="0.55" step="0.01"></div>
+        <div class="form-field"><label>Water Index (NDWI)</label><input type="number" id="z-ndwi" value="0.10" step="0.01"></div>
+        <div class="form-field"><label>Canopy Index (EVI)</label><input type="number" id="z-evi" value="0.40" step="0.01"></div>
+        <div class="form-field"><label>Soil-Adj. Index (SAVI)</label><input type="number" id="z-savi" value="0.45" step="0.01"></div>
+        <div class="form-field"><label>Near Infrared (NIR)</label><input type="number" id="z-nir" value="0.65" step="0.01"></div>
+        <div class="form-field"><label>Shortwave IR (SWIR)</label><input type="number" id="z-swir" value="0.30" step="0.01"></div>
+      </div>
+      <button class="btn-predict" onclick="predictZone()">Identify Field Zone</button>
+      <button class="btn-fill-sim" onclick="fillFromSim('zone')">Use Current Sensor Values</button>
+    </div>
+    <div class="card" id="zone-result">
+      <div class="card-title">Result</div>
+      <div class="result-placeholder">Enter readings on the left and click Identify Field Zone</div>
+    </div>
+  </div>
+</div>
+
+<!-- DISEASE PANEL -->
+<div id="panel-disease" class="panel">
+  <div class="inference-layout">
+    <div class="card">
+      <div class="card-title">Chilli Crop Disease Detector</div>
+      <div class="model-status-bar pending" id="c2-model-bar">
+        <span id="c2-status-text">Checking model status...</span>
+      </div>
+      <p class="panel-desc">Upload a photo of a chilli leaf. The AI will check for diseases like Leaf Curl, Leaf Spot, Whitefly, and more.</p>
+      <div class="upload-zone" id="upload-zone"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)">
+        <div class="upload-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="upload-text">Drop a leaf photo here</div>
+        <div class="upload-hint">Supports JPG and PNG files</div>
+        <input type="file" id="disease-file" accept="image/*" onchange="handleFileSelect(event)" style="display:none">
+        <button class="btn-browse" onclick="document.getElementById('disease-file').click()">Browse Files</button>
+      </div>
+      <div class="disease-preview-wrap" id="disease-preview-wrap" style="display:none">
+        <img id="disease-preview" class="disease-preview-img" alt="Leaf photo preview" />
+        <button class="btn-predict" onclick="predictDisease()">Detect Disease</button>
+        <button class="btn-fill-sim" onclick="clearDiseaseImage()">Remove Photo</button>
+      </div>
+      <div style="margin-top:18px">
+        <div class="card-title" style="margin-bottom:10px">Or Use Camera</div>
+        <video id="disease-cam" autoplay muted playsinline style="width:100%;border:1.5px solid var(--border);border-radius:var(--r-md);display:none"></video>
+        <canvas id="disease-canvas" style="display:none"></canvas>
+        <div class="cam-mini-btns">
+          <button class="btn-fill-sim" onclick="startDiseaseCam()">Start Camera</button>
+          <button class="btn-fill-sim" id="capture-disease-btn" onclick="captureDiseaseFrame()" disabled>Capture and Analyse</button>
+          <button class="btn-fill-sim" onclick="stopDiseaseCam()">Stop Camera</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="disease-result">
+      <div class="card-title">Result</div>
+      <div class="result-placeholder">Upload a photo of a chilli leaf to detect disease</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGS PANEL -->
+<div id="panel-logs" class="panel">
+  <div class="card logs-card">
+    <div class="card-title">Activity Log</div>
+    <div class="logs-scroll" id="logs-container">
+      <div class="log-placeholder">Loading activity log...</div>
+    </div>
+    <div class="log-input-row">
+      <input id="log-input" placeholder="Add a note to the activity log..." />
+      <button onclick="addLog()">Add Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANUAL INPUT MODAL -->
+<div id="manual-modal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-head-title">Enter Sensor Readings Manually</span>
+      <button class="modal-close" onclick="closeManualModal()">X</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-note">These values will be used for AI analysis immediately. The simulation will continue from these values as its starting point.</p>
+      <div class="modal-tabs">
+        <button class="mtab active" onclick="switchModalTab('moisture',this)">Moisture</button>
+        <button class="mtab" onclick="switchModalTab('temp',this)">Temperature</button>
+        <button class="mtab" onclick="switchModalTab('npk',this)">Nutrients</button>
+        <button class="mtab" onclick="switchModalTab('spectral',this)">Crop Indices</button>
+      </div>
+      <div id="modal-moisture" class="modal-tab-panel">
+        <div class="modal-form-grid">
+          <div class="mf-field"><label>Moisture at 30 cm</label><input type="number" id="m-vw30" value="0.28" step="0.01"></div>
+          <div class="mf-field"><label>Moisture at 60 cm</label><input type="number" id="m-vw60" value="0.25" step="0.01"></div>
+          <div class="mf-field"><label>Moisture at 90 cm</label><input type="number" id="m-vw90" value="0.22" step="0.01"></div>
+          <div class="mf-field"><label>Moisture at 120 cm</label><input type="number" id="m-vw120" value="0.20" step="0.01"></div>
+          <div class="mf-field"><label>Moisture at 150 cm</label><input type="number" id="m-vw150" value="0.18" step="0.01"></div>
+        </div>
+      </div>
+      <div id="modal-temp" class="modal-tab-panel" style="display:none">
+        <div class="modal-form-grid">
+          <div class="mf-field"><label>Temp at 30 cm (deg C)</label><input type="number" id="m-t30" value="24.5" step="0.1"></div>
+          <div class="mf-field"><label>Temp at 60 cm (deg C)</label><input type="number" id="m-t60" value="23.0" step="0.1"></div>
+          <div class="mf-field"><label>Temp at 90 cm (deg C)</label><input type="number" id="m-t90" value="21.8" step="0.1"></div>
+          <div class="mf-field"><label>Temp at 120 cm (deg C)</label><input type="number" id="m-t120" value="20.5" step="0.1"></div>
+          <div class="mf-field"><label>Temp at 150 cm (deg C)</label><input type="number" id="m-t150" value="19.2" step="0.1"></div>
+        </div>
+      </div>
+      <div id="modal-npk" class="modal-tab-panel" style="display:none">
+        <div class="modal-form-grid">
+          <div class="mf-field"><label>Nitrogen (mg/kg)</label><input type="number" id="m-n" value="50"></div>
+          <div class="mf-field"><label>Phosphorus (mg/kg)</label><input type="number" id="m-p" value="40"></div>
+          <div class="mf-field"><label>Potassium (mg/kg)</label><input type="number" id="m-k" value="60"></div>
+          <div class="mf-field"><label>Soil pH</label><input type="number" id="m-ph" value="6.8" step="0.1"></div>
+          <div class="mf-field"><label>Rainfall (mm)</label><input type="number" id="m-rain" value="120"></div>
+          <div class="mf-field"><label>Humidity (%)</label><input type="number" id="m-hum" value="65"></div>
+          <div class="mf-field"><label>Air Temperature (deg C)</label><input type="number" id="m-temp" value="26.5" step="0.1"></div>
+        </div>
+      </div>
+      <div id="modal-spectral" class="modal-tab-panel" style="display:none">
+        <div class="modal-form-grid">
+          <div class="mf-field"><label>NDVI (Vegetation)</label><input type="number" id="m-ndvi" value="0.55" step="0.01"></div>
+          <div class="mf-field"><label>NDWI (Water)</label><input type="number" id="m-ndwi" value="0.10" step="0.01"></div>
+          <div class="mf-field"><label>EVI (Canopy)</label><input type="number" id="m-evi" value="0.40" step="0.01"></div>
+          <div class="mf-field"><label>SAVI (Soil-Adj.)</label><input type="number" id="m-savi" value="0.45" step="0.01"></div>
+          <div class="mf-field"><label>Near Infrared (NIR)</label><input type="number" id="m-nir" value="0.65" step="0.01"></div>
+          <div class="mf-field"><label>Shortwave IR (SWIR)</label><input type="number" id="m-swir" value="0.30" step="0.01"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-apply" onclick="submitManualInput()">Apply Readings and Run Analysis</button>
+      <button class="btn-cancel" onclick="closeManualModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ROVER CONNECTION POPUP ==================== -->
+<div id="rover-popup-overlay" style="display:none" onclick="closeRoverPopup()">
+  <div class="rover-popup" id="rover-popup" onclick="event.stopPropagation()">
+    <div class="rover-popup-icon" id="rover-popup-icon"></div>
+    <div class="rover-popup-title" id="rover-popup-title">Rover Connected</div>
+    <div class="rover-popup-msg" id="rover-popup-msg">The rover is now connected and ready to receive commands from the mobile controller.</div>
+    <button class="rover-popup-btn" onclick="closeRoverPopup()">OK</button>
+  </div>
+</div>
+
+<!-- Slide-in notification toast (top-right) -->
+<div id="notif-toast" class="notif-toast" style="display:none">
+  <div class="notif-icon" id="notif-icon"></div>
+  <div class="notif-body">
+    <div class="notif-title" id="notif-title"></div>
+    <div class="notif-sub" id="notif-sub"></div>
+  </div>
+  <button class="notif-close" onclick="dismissNotif()">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+</div>
+
+<!-- Google Maps loader removed — using Leaflet.js (loaded dynamically on demand) -->
+
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>

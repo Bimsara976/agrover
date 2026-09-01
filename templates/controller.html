@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AgroRover Controller</title>
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:       #3A6B45;
+    --green-dark:  #2A5235;
+    --green-light: #EBF5EF;
+    --green-mid:   #5A9468;
+    --bg:          #F5F1EB;
+    --card:        #FFFFFF;
+    --border:      #D9D0C4;
+    --text:        #2C2416;
+    --text-mid:    #5A4E3C;
+    --text-light:  #8C7D6A;
+    --amber:       #D4830A;
+    --amber-bg:    #FEF3DC;
+    --red:         #B83A2A;
+    --red-bg:      #FDECEA;
+    --shadow:      0 4px 16px rgba(44,36,22,0.12);
+    --r:           16px;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+  /* ── Desktop block screen ── */
+  .desktop-block {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--green-dark);
+    color: #fff;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+    padding: 40px;
+    z-index: 9999;
+  }
+
+  .desktop-block svg { opacity: 0.6; }
+
+  .desktop-block h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .desktop-block p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    max-width: 380px;
+    line-height: 1.6;
+  }
+
+  .desktop-block .url-box {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+  }
+
+  @media (min-width: 768px) {
+    .desktop-block { display: flex; }
+    .mobile-app    { display: none; }
+  }
+
+  /* ── Mobile app ── */
+  .mobile-app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    height: 100vh;
+  }
+
+  /* ── Header ── */
+  .ctrl-header {
+    background: var(--green);
+    padding: 14px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(44,36,22,0.15);
+  }
+
+  .ctrl-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ctrl-brand-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+
+  .ctrl-brand-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    font-weight: 500;
+  }
+
+  /* ── Connection toggle ── */
+  .conn-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .conn-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+  }
+
+  /* Toggle switch */
+  .toggle-wrap {
+    position: relative;
+    width: 56px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+
+  .toggle-wrap input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.25);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.25s;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 2px;
+    top: 2px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .toggle-wrap input:checked + .toggle-slider {
+    background: #4ADE80;
+    border-color: #22C55E;
+  }
+
+  .toggle-wrap input:checked + .toggle-slider::before {
+    transform: translateX(26px);
+  }
+
+  /* ── Status banner ── */
+  .status-banner {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .status-banner.disconnected {
+    background: var(--red-bg);
+    color: var(--red);
+    border-bottom: 1px solid #F0B4AC;
+  }
+
+  .status-banner.connected {
+    background: var(--green-light);
+    color: var(--green-dark);
+    border-bottom: 1px solid #B8DFC4;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-banner.disconnected .status-dot {
+    background: var(--red);
+  }
+
+  .status-banner.connected .status-dot {
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(58,107,69,0.25);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(58,107,69,0.25); }
+    50%       { box-shadow: 0 0 0 6px rgba(58,107,69,0.10); }
+  }
+
+  /* ── Live stats strip ── */
+  .stats-strip {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .stat-lbl {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light);
+  }
+
+  .stat-num {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-unit {
+    font-size: 10px;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  /* ── Controller body ── */
+  .ctrl-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 24px;
+    gap: 20px;
+  }
+
+  /* ── D-pad ── */
+  .dpad-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .dpad-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .dpad-btn {
+    width: 90px;
+    height: 90px;
+    border: none;
+    background: var(--card);
+    border-radius: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    box-shadow: var(--shadow);
+    transition: background 0.12s, transform 0.08s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+
+  /* Rounded outer corners of the D-pad */
+  .dpad-btn.top    { border-radius: var(--r) var(--r) 4px 4px; }
+  .dpad-btn.bottom { border-radius: 4px 4px var(--r) var(--r); }
+  .dpad-btn.left   { border-radius: var(--r) 4px 4px var(--r); }
+  .dpad-btn.right  { border-radius: 4px var(--r) var(--r) 4px; }
+
+  .dpad-btn:active,
+  .dpad-btn.pressing {
+    background: var(--green-light);
+    transform: scale(0.93);
+  }
+
+  .dpad-btn.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .dpad-key {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 1px;
+  }
+
+  .dpad-btn svg {
+    color: var(--green);
+  }
+
+  /* Center stop button */
+  .dpad-center {
+    width: 90px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+
+  .stop-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid #F0B4AC;
+    background: var(--red-bg);
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(184,58,42,0.15);
+    transition: all 0.12s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .stop-btn:active {
+    transform: scale(0.90);
+    background: #F0B4AC;
+    color: #fff;
+  }
+
+  .stop-btn.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* ── Command feedback ── */
+  .cmd-feedback {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-align: center;
+    min-height: 22px;
+    transition: color 0.2s;
+  }
+
+  .cmd-feedback.active {
+    color: var(--green);
+  }
+
+  /* ── Direction labels ── */
+  .dir-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-mid);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Footer ── */
+  .ctrl-footer {
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  /* ── Alert toast ── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(44,36,22,0.25);
+  }
+
+  .toast.green  { background: var(--green); }
+  .toast.red    { background: var(--red); }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- Desktop block screen (hidden on mobile) -->
+<div class="desktop-block">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+    <rect x="2" y="3" width="20" height="14" rx="2"/>
+    <path d="M8 21h8M12 17v4"/>
+  </svg>
+  <h2>Mobile Controller Only</h2>
+  <p>This page is designed for mobile devices. Open this address on your phone or tablet to control the rover.</p>
+  <div class="url-box" id="url-display">Loading address...</div>
+</div>
+
+<!-- Mobile app -->
+<div class="mobile-app">
+
+  <!-- Header -->
+  <header class="ctrl-header">
+    <div class="ctrl-brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+      <div>
+        <div class="ctrl-brand-name">AgroRover</div>
+        <div class="ctrl-brand-sub">Field Controller</div>
+      </div>
+    </div>
+
+    <div class="conn-section">
+      <span class="conn-label">Rover</span>
+      <label class="toggle-wrap" aria-label="Connect or disconnect rover">
+        <input type="checkbox" id="conn-toggle" onchange="handleConnectionToggle(this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </header>
+
+  <!-- Status banner -->
+  <div class="status-banner disconnected" id="status-banner">
+    <div class="status-dot"></div>
+    <span id="status-text">Rover is disconnected</span>
+  </div>
+
+  <!-- Live stats strip -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <span class="stat-lbl">Speed</span>
+      <span class="stat-num" id="stat-speed">0.0</span>
+      <span class="stat-unit">km/h</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-lbl">Heading</span>
+      <span class="stat-num" id="stat-heading">45</span>
+      <span class="stat-unit">deg</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-lbl">Battery</span>
+      <span class="stat-num" id="stat-battery">--</span>
+      <span class="stat-unit">%</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-lbl">Distance</span>
+      <span class="stat-num" id="stat-dist">21.0</span>
+      <span class="stat-unit">km</span>
+    </div>
+  </div>
+
+  <!-- D-pad controller -->
+  <div class="ctrl-body">
+
+    <div class="dpad-wrap" id="dpad">
+
+      <!-- Top row: Forward -->
+      <div class="dpad-row">
+        <button class="dpad-btn top disabled" id="btn-w"
+                ontouchstart="pressBtn('W', this)" ontouchend="releaseBtn(this)"
+                onmousedown="pressBtn('W', this)" onmouseup="releaseBtn(this)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+          <span class="dpad-key">W</span>
+        </button>
+      </div>
+
+      <!-- Middle row: Left, Stop, Right -->
+      <div class="dpad-row">
+        <button class="dpad-btn left disabled" id="btn-a"
+                ontouchstart="pressBtn('A', this)" ontouchend="releaseBtn(this)"
+                onmousedown="pressBtn('A', this)" onmouseup="releaseBtn(this)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span class="dpad-key">A</span>
+        </button>
+
+        <div class="dpad-center">
+          <button class="stop-btn disabled" id="btn-stop"
+                  ontouchstart="sendCommand('STOP')" onmousedown="sendCommand('STOP')">
+            STOP
+          </button>
+        </div>
+
+        <button class="dpad-btn right disabled" id="btn-d"
+                ontouchstart="pressBtn('D', this)" ontouchend="releaseBtn(this)"
+                onmousedown="pressBtn('D', this)" onmouseup="releaseBtn(this)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+          <span class="dpad-key">D</span>
+        </button>
+      </div>
+
+      <!-- Bottom row: Reverse -->
+      <div class="dpad-row">
+        <button class="dpad-btn bottom disabled" id="btn-s"
+                ontouchstart="pressBtn('S', this)" ontouchend="releaseBtn(this)"
+                onmousedown="pressBtn('S', this)" onmouseup="releaseBtn(this)">
+          <span class="dpad-key">S</span>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Command feedback -->
+    <div class="cmd-feedback" id="cmd-feedback">Connect the rover to start controlling</div>
+
+    <!-- Direction guide -->
+    <div style="display:flex;gap:32px;justify-content:center;margin-top:4px">
+      <div style="text-align:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+        <div class="dir-label">Forward</div>
+      </div>
+      <div style="text-align:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="dir-label">Reverse</div>
+      </div>
+      <div style="text-align:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <div class="dir-label">Turn Left</div>
+      </div>
+      <div style="text-align:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="dir-label">Turn Right</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="ctrl-footer">
+    Commands send to rover in real time &nbsp;·&nbsp; AgroRover v1.0
+  </div>
+
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+let isConnected = false;
+let pollInterval = null;
+let cmdDebounce  = null;
+
+// Show desktop URL
+const urlEl = document.getElementById('url-display');
+if (urlEl) urlEl.textContent = window.location.origin + '/controller';
+
+// ── Connection toggle ─────────────────────────────
+async function handleConnectionToggle(checked) {
+  try {
+    const res = await fetch('/api/rover/connection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ connected: checked })
+    });
+    const data = await res.json();
+    isConnected = data.connected;
+    updateConnectionUI(isConnected);
+    showToast(
+      isConnected ? 'Rover is connected' : 'Rover is disconnected',
+      isConnected ? 'green' : 'red'
+    );
+  } catch(e) {
+    // Revert toggle on error
+    document.getElementById('conn-toggle').checked = !checked;
+    showToast('Connection failed — check network', 'red');
+  }
+}
+
+function updateConnectionUI(connected) {
+  const banner   = document.getElementById('status-banner');
+  const text     = document.getElementById('status-text');
+  const feedback = document.getElementById('cmd-feedback');
+  const buttons  = ['btn-w','btn-a','btn-s','btn-d','btn-stop'];
+
+  if (connected) {
+    banner.className = 'status-banner connected';
+    text.textContent = 'Rover is connected';
+    feedback.textContent = 'Ready — tap a direction to move';
+    feedback.className = 'cmd-feedback active';
+    buttons.forEach(id => document.getElementById(id)?.classList.remove('disabled'));
+    if (!pollInterval) pollInterval = setInterval(pollStats, 1500);
+  } else {
+    banner.className = 'status-banner disconnected';
+    text.textContent = 'Rover is disconnected';
+    feedback.textContent = 'Connect the rover to start controlling';
+    feedback.className = 'cmd-feedback';
+    buttons.forEach(id => document.getElementById(id)?.classList.add('disabled'));
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+}
+
+// ── Commands ──────────────────────────────────────
+async function sendCommand(cmd) {
+  if (!isConnected) return;
+
+  // Debounce rapid taps (100ms)
+  clearTimeout(cmdDebounce);
+  cmdDebounce = setTimeout(async () => {
+    try {
+      const res = await fetch('/api/rover/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        updateStats(data.speed, data.heading);
+        showFeedback(cmd);
+      }
+    } catch(e) { /* silent */ }
+  }, 80);
+}
+
+function pressBtn(cmd, el) {
+  if (!isConnected) return;
+  el.classList.add('pressing');
+  sendCommand(cmd);
+}
+
+function releaseBtn(el) {
+  el.classList.remove('pressing');
+}
+
+const cmdLabels = {
+  W: 'Moving forward',
+  S: 'Reversing',
+  A: 'Turning left',
+  D: 'Turning right',
+  STOP: 'Stopped'
+};
+
+function showFeedback(cmd) {
+  const el = document.getElementById('cmd-feedback');
+  el.textContent = cmdLabels[cmd] || cmd;
+  el.className = 'cmd-feedback active';
+}
+
+// ── Keyboard support ──────────────────────────────
+document.addEventListener('keydown', e => {
+  if (!isConnected) return;
+  const map = { ArrowUp:'W', ArrowDown:'S', ArrowLeft:'A', ArrowRight:'D', ' ':'STOP',
+                w:'W', s:'S', a:'A', d:'D' };
+  const cmd = map[e.key];
+  if (!cmd) return;
+  e.preventDefault();
+  const btnMap = { W:'btn-w', S:'btn-s', A:'btn-a', D:'btn-d', STOP:'btn-stop' };
+  document.getElementById(btnMap[cmd])?.classList.add('pressing');
+  sendCommand(cmd);
+});
+
+document.addEventListener('keyup', e => {
+  ['btn-w','btn-s','btn-a','btn-d','btn-stop'].forEach(id =>
+    document.getElementById(id)?.classList.remove('pressing'));
+});
+
+// ── Live stats polling ────────────────────────────
+async function pollStats() {
+  try {
+    const res = await fetch('/api/status');
+    const d   = await res.json();
+    updateStats(d.rover.speed, d.rover.heading);
+    document.getElementById('stat-battery').textContent = Math.round(d.rover.battery);
+    document.getElementById('stat-dist').textContent    = d.rover.distance_travelled.toFixed(1);
+  } catch(e) {}
+}
+
+function updateStats(speed, heading) {
+  const s = document.getElementById('stat-speed');
+  const h = document.getElementById('stat-heading');
+  if (s) s.textContent = typeof speed   === 'number' ? speed.toFixed(1)   : speed;
+  if (h) h.textContent = typeof heading === 'number' ? Math.round(heading) : heading;
+}
+
+// ── Toast ─────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast ' + (type || '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.className = 'toast ' + (type || '');
+  }, 2800);
+}
+
+// ── Prevent scroll on touch ───────────────────────
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
+// ── Init ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Sync toggle to server state
+  fetch('/api/rover/connection')
+    .then(r => r.json())
+    .then(d => {
+      isConnected = d.connected;
+      document.getElementById('conn-toggle').checked = isConnected;
+      updateConnectionUI(isConnected);
+    }).catch(() => {});
+});
+</script>
+</body>
+</html>
