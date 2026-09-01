@@ -1,0 +1,392 @@
+{
+  "_comment": "Agronomic recommendation mappings. Disease treatment + growth monitoring keyed by Component 2 class name; fertilizer rules keyed by Component 4 soil health class plus nutrient thresholds.",
+
+  "disease_treatment": {
+    "Healthy": {
+      "severity": "None",
+      "severity_level": 0,
+      "summary": "No disease detected. The leaf shows normal colour, shape and surface texture.",
+      "immediate_action": "No treatment required. Continue the routine crop care schedule.",
+      "organic_control": [
+        "Keep applying neem oil spray once every 14 days as a preventive measure",
+        "Maintain field sanitation — remove fallen leaves and weeds around the plants"
+      ],
+      "chemical_control": [
+        "No chemical application needed at this stage"
+      ],
+      "cultural_practice": [
+        "Maintain 45-60 cm spacing between plants for good air movement",
+        "Irrigate at the base of the plant, avoid wetting the foliage",
+        "Scout the field twice a week for early symptoms"
+      ],
+      "re_check_after_days": 7
+    },
+
+    "Leaf Curl": {
+      "severity": "High",
+      "severity_level": 3,
+      "summary": "Upward or downward curling of leaves, usually caused by chilli leaf curl virus spread by whitefly, or by thrips and mite feeding damage.",
+      "immediate_action": "Uproot and destroy severely infected plants — the virus cannot be cured once inside the plant. Control the insect vector immediately to stop further spread.",
+      "organic_control": [
+        "Spray neem oil at 5 ml per litre of water, repeat every 7 days for 3 rounds",
+        "Install yellow sticky traps at 10-12 traps per acre to catch whitefly and thrips",
+        "Spray a garlic and chilli extract as a repellent between neem rounds"
+      ],
+      "chemical_control": [
+        "Imidacloprid 17.8 SL at 0.3 ml per litre against whitefly",
+        "Spiromesifen 22.9 SC at 1 ml per litre against mites and thrips",
+        "Rotate the insecticide group every spray to avoid resistance build-up"
+      ],
+      "cultural_practice": [
+        "Remove and burn infected plants away from the field, do not compost them",
+        "Grow a maize or sorghum barrier crop around the chilli block",
+        "Control weeds such as Parthenium that host the virus",
+        "Use virus-tolerant chilli varieties in the next planting cycle"
+      ],
+      "re_check_after_days": 3
+    },
+
+    "Leaf Spot": {
+      "severity": "Moderate",
+      "severity_level": 2,
+      "summary": "Circular brown or grey spots with dark margins, typically Cercospora leaf spot or bacterial leaf spot. Spreads fast in wet, humid weather.",
+      "immediate_action": "Remove and destroy affected leaves, then apply a protective fungicide before the next rain.",
+      "organic_control": [
+        "Spray Bordeaux mixture at 1 percent, or copper oxychloride at 3 g per litre",
+        "Apply Trichoderma viride or Pseudomonas fluorescens as a foliar spray at 5 g per litre",
+        "Spray diluted buttermilk or a baking soda solution as a mild surface treatment"
+      ],
+      "chemical_control": [
+        "Mancozeb 75 WP at 2.5 g per litre, repeat after 10-12 days",
+        "Carbendazim 50 WP at 1 g per litre for persistent infection",
+        "Alternate the two so the pathogen does not develop resistance"
+      ],
+      "cultural_practice": [
+        "Avoid overhead irrigation — switch to drip or furrow watering",
+        "Improve drainage so water does not stand between rows",
+        "Do not work in the field while the plants are wet",
+        "Follow a 2-year crop rotation with a non-solanaceous crop"
+      ],
+      "re_check_after_days": 5
+    },
+
+    "Whitefly": {
+      "severity": "High",
+      "severity_level": 3,
+      "summary": "Whitefly infestation. Tiny white insects on the leaf underside sucking sap, leaving sticky honeydew and sooty mould. They are also the vector for leaf curl virus.",
+      "immediate_action": "Start vector control at once. Whitefly damage is secondary — the real risk is virus transmission across the whole block.",
+      "organic_control": [
+        "Spray neem oil at 5 ml per litre on the underside of leaves, every 5-7 days",
+        "Install yellow sticky traps at 12-15 per acre at canopy height",
+        "Release Encarsia formosa parasitoid wasps if available locally",
+        "Spray insecticidal soap at 10 ml per litre in the early morning"
+      ],
+      "chemical_control": [
+        "Imidacloprid 17.8 SL at 0.3 ml per litre as a foliar spray",
+        "Diafenthiuron 50 WP at 1.2 g per litre for heavy infestation",
+        "Spray in the early morning or late evening when whitefly are least active"
+      ],
+      "cultural_practice": [
+        "Remove weeds and volunteer plants that harbour whitefly populations",
+        "Use silver reflective mulch between rows to repel incoming adults",
+        "Avoid excess nitrogen — soft, lush growth attracts whitefly",
+        "Inspect the underside of leaves twice a week"
+      ],
+      "re_check_after_days": 3
+    },
+
+    "Yellowish": {
+      "severity": "Moderate",
+      "severity_level": 2,
+      "summary": "Yellowing of the leaves (chlorosis). Usually a nitrogen or magnesium deficiency, waterlogged roots, or the early stage of a viral infection.",
+      "immediate_action": "Check root-zone drainage first, then correct the nutrient deficiency with a foliar feed for a fast response.",
+      "organic_control": [
+        "Apply well-decomposed compost or farmyard manure at 2-3 kg per plant",
+        "Spray 1 percent Epsom salt solution if the yellowing is between the leaf veins",
+        "Drench with vermicompost tea once a week to improve nutrient uptake"
+      ],
+      "chemical_control": [
+        "Foliar spray of urea at 2 percent for a quick nitrogen correction",
+        "Spray 19:19:19 water-soluble fertilizer at 5 g per litre",
+        "Apply a micronutrient mixture containing Fe, Zn and Mg at 2 g per litre"
+      ],
+      "cultural_practice": [
+        "Improve drainage — waterlogging is the most common cause of chilli yellowing",
+        "Check soil pH; nutrients lock up outside the 6.0-7.0 range",
+        "Loosen compacted soil around the root zone",
+        "If yellowing is patchy and mosaic-like, suspect virus and isolate the plant"
+      ],
+      "re_check_after_days": 7
+    },
+
+    "Anthracnose": {
+      "severity": "Severe",
+      "severity_level": 4,
+      "summary": "Anthracnose (fruit rot / die-back) caused by Colletotrichum. Sunken dark lesions with concentric rings on fruit and leaves. It is the most damaging chilli disease in wet season conditions.",
+      "immediate_action": "Remove and destroy all infected fruit and shoots immediately, then begin a systemic fungicide programme. Do not delay — losses escalate quickly once fruiting starts.",
+      "organic_control": [
+        "Spray Trichoderma harzianum at 5 g per litre every 10 days",
+        "Apply copper oxychloride at 3 g per litre as a protective cover spray",
+        "Treat seeds with hot water at 52 deg C for 30 minutes before the next sowing"
+      ],
+      "chemical_control": [
+        "Azoxystrobin 23 SC at 1 ml per litre, the most effective option for anthracnose",
+        "Difenoconazole 25 EC at 0.5 ml per litre as an alternate spray",
+        "Chlorothalonil 75 WP at 2 g per litre as a protective barrier before rain",
+        "Repeat every 10-12 days through the fruiting stage"
+      ],
+      "cultural_practice": [
+        "Harvest ripe fruit promptly — over-ripe fruit on the plant spreads spores",
+        "Destroy all crop residue after harvest, do not leave it in the field",
+        "Stake the plants so fruit does not touch the soil",
+        "Practise a 3-year rotation away from chilli, tomato and brinjal"
+      ],
+      "re_check_after_days": 3
+    }
+  },
+
+  "growth_monitoring": {
+    "Healthy": {
+      "growth_status": "Normal Growth",
+      "status_class": "good",
+      "vigour_score": 95,
+      "expected_yield_impact": "No yield loss expected",
+      "yield_loss_percent": 0,
+      "stage_risk": "Low",
+      "canopy_condition": "Full canopy, uniform green colour, normal leaf expansion",
+      "recovery_outlook": "Plant is developing on schedule. No intervention needed.",
+      "monitoring_interval_days": 7,
+      "watch_for": [
+        "Any new yellowing or curling on the growing tips",
+        "White insects on the underside of leaves",
+        "Spotting after periods of heavy rain"
+      ]
+    },
+
+    "Leaf Curl": {
+      "growth_status": "Severely Stunted",
+      "status_class": "alert",
+      "vigour_score": 30,
+      "expected_yield_impact": "Heavy loss — 50 to 80 percent if the infection spreads",
+      "yield_loss_percent": 65,
+      "stage_risk": "Critical",
+      "canopy_condition": "Leaves curled and reduced in size, shortened internodes, bushy stunted appearance",
+      "recovery_outlook": "Infected plants will not recover. Focus on protecting the remaining healthy plants from the vector.",
+      "monitoring_interval_days": 3,
+      "watch_for": [
+        "Curling appearing on neighbouring plants — indicates active spread",
+        "Whitefly population on nearby healthy plants",
+        "Flower drop and failure to set fruit"
+      ]
+    },
+
+    "Leaf Spot": {
+      "growth_status": "Moderately Affected",
+      "status_class": "warn",
+      "vigour_score": 60,
+      "expected_yield_impact": "Moderate loss — 20 to 35 percent if left untreated",
+      "yield_loss_percent": 27,
+      "stage_risk": "Moderate",
+      "canopy_condition": "Spotted leaves, progressive defoliation from the lower canopy upward",
+      "recovery_outlook": "Good recovery expected if treated within a week. New growth should emerge clean.",
+      "monitoring_interval_days": 5,
+      "watch_for": [
+        "Spots spreading to the upper canopy",
+        "Rate of leaf drop after each rain event",
+        "Spots appearing on the fruit surface"
+      ]
+    },
+
+    "Whitefly": {
+      "growth_status": "Growth Suppressed",
+      "status_class": "alert",
+      "vigour_score": 45,
+      "expected_yield_impact": "High risk — 30 to 60 percent, mainly through virus transmission",
+      "yield_loss_percent": 45,
+      "stage_risk": "High",
+      "canopy_condition": "Sap loss causing weak growth, sticky honeydew and black sooty mould on leaf surfaces",
+      "recovery_outlook": "Plant recovers well once the population is controlled, provided no virus has been transmitted.",
+      "monitoring_interval_days": 3,
+      "watch_for": [
+        "Leaf curl symptoms appearing 10-15 days after infestation",
+        "Sooty mould reducing the photosynthetic leaf area",
+        "Adult whitefly clouds rising when plants are disturbed"
+      ]
+    },
+
+    "Yellowish": {
+      "growth_status": "Nutrient Stressed",
+      "status_class": "warn",
+      "vigour_score": 55,
+      "expected_yield_impact": "Moderate loss — 15 to 30 percent if the deficiency continues",
+      "yield_loss_percent": 22,
+      "stage_risk": "Moderate",
+      "canopy_condition": "Pale to yellow foliage, thin canopy, reduced new shoot growth",
+      "recovery_outlook": "Quick recovery, often within 10-14 days, once the deficiency or drainage problem is corrected.",
+      "monitoring_interval_days": 7,
+      "watch_for": [
+        "Whether the new growth comes out green after feeding",
+        "Yellowing pattern — whole leaf points to nitrogen, between veins points to magnesium",
+        "Standing water around the root zone after irrigation"
+      ]
+    },
+
+    "Anthracnose": {
+      "growth_status": "Critically Affected",
+      "status_class": "alert",
+      "vigour_score": 20,
+      "expected_yield_impact": "Severe loss — 60 to 90 percent of marketable fruit",
+      "yield_loss_percent": 75,
+      "stage_risk": "Critical",
+      "canopy_condition": "Shoot die-back, defoliation, sunken lesions on fruit making it unmarketable",
+      "recovery_outlook": "Existing infected fruit cannot be saved. Aggressive treatment can protect the later flushes.",
+      "monitoring_interval_days": 3,
+      "watch_for": [
+        "New lesions on green fruit — the earliest sign of the next infection wave",
+        "Die-back progressing down the branches",
+        "Spore spread after every rainfall or overhead irrigation"
+      ]
+    }
+  },
+
+  "fertilizer": {
+    "nutrient_thresholds": {
+      "nitrogen":   { "low": 40, "high": 80,  "unit": "mg/kg" },
+      "phosphorus": { "low": 30, "high": 60,  "unit": "mg/kg" },
+      "potassium":  { "low": 40, "high": 100, "unit": "mg/kg" }
+    },
+
+    "ph_bands": [
+      {
+        "max": 5.5,
+        "label": "Strongly Acidic",
+        "status_class": "alert",
+        "advice": "Apply agricultural lime or dolomite at 500-1000 kg per hectare, 3-4 weeks before planting. Below pH 5.5 phosphorus and molybdenum become locked and unavailable to the crop."
+      },
+      {
+        "max": 6.0,
+        "label": "Slightly Acidic",
+        "status_class": "warn",
+        "advice": "Apply dolomite at 250-500 kg per hectare to lift the pH toward 6.5. Dolomite also supplies magnesium, which chilli responds well to."
+      },
+      {
+        "max": 7.5,
+        "label": "Optimal",
+        "status_class": "good",
+        "advice": "The pH is in the ideal 6.0-7.5 range for chilli. No correction needed — nutrient availability is at its best here."
+      },
+      {
+        "max": 14.0,
+        "label": "Alkaline",
+        "status_class": "warn",
+        "advice": "Apply elemental sulphur at 200-400 kg per hectare, or gypsum on sodic soils. Above pH 7.5 iron and zinc become deficient, so add a chelated micronutrient spray."
+      }
+    ],
+
+    "nutrient_actions": {
+      "nitrogen": {
+        "Low": {
+          "status_class": "alert",
+          "product": "Urea (46% N)",
+          "dose": "Apply 130-150 kg per hectare, split into 3 doses",
+          "note": "Split at planting, 30 days and 60 days. Nitrogen leaches quickly in the wet zone, so never apply the full quantity in one go."
+        },
+        "Optimal": {
+          "status_class": "good",
+          "product": "Urea (46% N)",
+          "dose": "Maintenance dose of 60-80 kg per hectare",
+          "note": "Nitrogen is in the right range. Apply only a light top dressing at the flowering stage."
+        },
+        "High": {
+          "status_class": "warn",
+          "product": "No nitrogen fertilizer",
+          "dose": "Skip nitrogen this cycle",
+          "note": "Excess nitrogen produces leafy growth with poor fruit set and attracts whitefly and aphids. Let the crop draw down the surplus."
+        }
+      },
+      "phosphorus": {
+        "Low": {
+          "status_class": "alert",
+          "product": "Triple Super Phosphate (46% P2O5)",
+          "dose": "Apply 90-110 kg per hectare as a full basal dose",
+          "note": "Apply the whole quantity at land preparation and mix into the root zone. Phosphorus moves very little in soil, so surface application is wasted."
+        },
+        "Optimal": {
+          "status_class": "good",
+          "product": "Triple Super Phosphate (46% P2O5)",
+          "dose": "Basal dose of 50-60 kg per hectare",
+          "note": "Phosphorus is adequate. A modest basal application supports early root development."
+        },
+        "High": {
+          "status_class": "warn",
+          "product": "No phosphate fertilizer",
+          "dose": "Skip phosphorus this cycle",
+          "note": "Surplus phosphorus blocks zinc and iron uptake and runs off into waterways. Hold off until the next soil test."
+        }
+      },
+      "potassium": {
+        "Low": {
+          "status_class": "alert",
+          "product": "Muriate of Potash (60% K2O)",
+          "dose": "Apply 90-110 kg per hectare, split into 2 doses",
+          "note": "Half at planting and half at the start of flowering. Potassium drives fruit size, pungency and colour development."
+        },
+        "Optimal": {
+          "status_class": "good",
+          "product": "Muriate of Potash (60% K2O)",
+          "dose": "Maintenance dose of 50-60 kg per hectare",
+          "note": "Potassium is sufficient. Apply at flowering to support fruit filling."
+        },
+        "High": {
+          "status_class": "warn",
+          "product": "No potash fertilizer",
+          "dose": "Skip potassium this cycle",
+          "note": "High potassium competes with magnesium and calcium uptake, which can trigger blossom end rot in the fruit."
+        }
+      }
+    },
+
+    "health_plan": {
+      "Healthy": {
+        "headline": "Maintenance Programme",
+        "status_class": "good",
+        "strategy": "The soil is in good condition. Apply a balanced maintenance dose and focus on preserving organic matter.",
+        "organic_matter": "Apply 5-8 tonnes per hectare of well-decomposed farmyard manure or compost before the next planting.",
+        "application_schedule": [
+          "Basal — full phosphorus, one third of the nitrogen and half the potassium at land preparation",
+          "30 days after planting — one third of the nitrogen",
+          "60 days after planting — remaining nitrogen and potassium at the flowering stage"
+        ],
+        "retest_after_days": 90
+      },
+      "Moderate": {
+        "headline": "Corrective Programme",
+        "status_class": "warn",
+        "strategy": "The soil needs targeted correction. Address the deficient nutrients listed below and rebuild organic matter over this season.",
+        "organic_matter": "Apply 8-12 tonnes per hectare of compost or farmyard manure, plus a green manure crop such as sunn hemp between cycles.",
+        "application_schedule": [
+          "Basal — full phosphorus, one third of the nitrogen and half the potassium, plus all organic matter",
+          "20 days after planting — one third of the nitrogen with a micronutrient foliar spray",
+          "45 days after planting — remaining nitrogen and potassium",
+          "70 days after planting — foliar 19:19:19 at 5 g per litre to carry the crop through fruiting"
+        ],
+        "retest_after_days": 60
+      },
+      "Poor": {
+        "headline": "Soil Rehabilitation Programme",
+        "status_class": "alert",
+        "strategy": "The soil is degraded and needs rebuilding, not just feeding. Combine heavy organic amendment with corrective fertilizer, and expect two seasons for full recovery.",
+        "organic_matter": "Apply 15-20 tonnes per hectare of farmyard manure or compost. Add biochar at 2-3 tonnes per hectare if available, and incorporate a full green manure crop before replanting.",
+        "application_schedule": [
+          "Pre-plant — incorporate all organic matter and any pH correction 3-4 weeks ahead of planting",
+          "Basal — full phosphorus, one quarter of the nitrogen and half the potassium",
+          "20 days after planting — one quarter of the nitrogen plus biofertilizer (Azospirillum and phosphate solubilising bacteria) at 5 kg per hectare",
+          "40 days after planting — one quarter of the nitrogen with a micronutrient mixture",
+          "65 days after planting — remaining nitrogen and potassium",
+          "Consider a legume rotation next season before returning to chilli"
+        ],
+        "retest_after_days": 45
+      }
+    }
+  }
+}

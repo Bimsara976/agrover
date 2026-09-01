@@ -1,0 +1,137 @@
+{
+  "_comment": "All simulation constants for the AgroRover dashboard. Edit values here — no code changes needed.",
+
+  "mission": {
+    "sol": "SOL #3039",
+    "mission_day": 3039,
+    "sunrise": "06:37 am",
+    "sunset": "08:35 pm"
+  },
+
+  "rover": {
+    "battery": 87,
+    "battery_min": 5,
+    "battery_drain_per_tick": [0.0, 0.02],
+    "speed": 0,
+    "speed_min": 0,
+    "speed_max": 25,
+    "speed_step": 1.5,
+    "speed_command_step": 3,
+    "heading": 45,
+    "heading_jitter": 5,
+    "heading_command_step": 15,
+    "gps_lat": 7.2096,
+    "gps_lon": 79.8358,
+    "gps_jitter": 0.0001,
+    "distance_travelled": 21.0,
+    "distance_per_speed_unit_per_tick": 0.001,
+    "remaining_distance": 54.3,
+    "cell_range": [60, 90],
+    "gas_press_range": [10.0, 15.0]
+  },
+
+  "simulation": {
+    "tick_seconds": 1.0,
+    "persist_every_n_ticks": 5,
+    "history_limit": 500
+  },
+
+  "initial_sensors": {
+    "vw_30cm": 0.28,
+    "vw_60cm": 0.25,
+    "vw_90cm": 0.22,
+    "vw_120cm": 0.20,
+    "vw_150cm": 0.18,
+    "t_30cm": 24.5,
+    "t_60cm": 23.0,
+    "t_90cm": 21.8,
+    "t_120cm": 20.5,
+    "t_150cm": 19.2,
+    "nitrogen": 50,
+    "phosphorus": 40,
+    "potassium": 60,
+    "temperature": 26.5,
+    "humidity": 65.0,
+    "ph_value": 6.8,
+    "rainfall": 120.0,
+    "nir": 0.65,
+    "swir": 0.30,
+    "ndvi": 0.55,
+    "ndwi": 0.10,
+    "evi": 0.40,
+    "savi": 0.45
+  },
+
+  "sensor_ranges": {
+    "vw_30cm":     { "min": 0.05, "max": 0.60, "step": 0.005 },
+    "vw_60cm":     { "min": 0.05, "max": 0.60, "step": 0.005 },
+    "vw_90cm":     { "min": 0.05, "max": 0.60, "step": 0.005 },
+    "vw_120cm":    { "min": 0.05, "max": 0.60, "step": 0.005 },
+    "vw_150cm":    { "min": 0.05, "max": 0.60, "step": 0.005 },
+    "t_30cm":      { "min": 10,   "max": 40,   "step": 0.3 },
+    "t_60cm":      { "min": 10,   "max": 40,   "step": 0.3 },
+    "t_90cm":      { "min": 10,   "max": 40,   "step": 0.3 },
+    "t_120cm":     { "min": 10,   "max": 40,   "step": 0.3 },
+    "t_150cm":     { "min": 10,   "max": 40,   "step": 0.3 },
+    "nitrogen":    { "min": 0,    "max": 140,  "step": 1.5 },
+    "phosphorus":  { "min": 0,    "max": 145,  "step": 1.2 },
+    "potassium":   { "min": 0,    "max": 205,  "step": 1.8 },
+    "temperature": { "min": 10,   "max": 45,   "step": 0.4 },
+    "humidity":    { "min": 20,   "max": 100,  "step": 1.0 },
+    "ph_value":    { "min": 3.5,  "max": 9.0,  "step": 0.05 },
+    "rainfall":    { "min": 0,    "max": 300,  "step": 2.0 },
+    "nir":         { "min": 0,    "max": 1,    "step": 0.01 },
+    "swir":        { "min": 0,    "max": 1,    "step": 0.01 },
+    "ndvi":        { "min": -1,   "max": 1,    "step": 0.01 },
+    "ndwi":        { "min": -1,   "max": 1,    "step": 0.01 },
+    "evi":         { "min": -1,   "max": 1,    "step": 0.01 },
+    "savi":        { "min": -1,   "max": 1,    "step": 0.01 }
+  },
+
+  "initial_inference": {
+    "anomaly_status": "Normal",
+    "anomaly_score": 0.05,
+    "zone_label": "Sparse Vegetation",
+    "zone_id": 0,
+    "soil_health": "Healthy",
+    "soil_confidence": 0.92
+  },
+
+  "api_defaults": {
+    "anomaly": {
+      "vw_default": 0.25,
+      "t_default": 22.0
+    },
+    "zone": {
+      "nir": 0.65,
+      "swir": 0.30,
+      "ndvi": 0.55,
+      "ndwi": 0.10,
+      "evi": 0.40,
+      "savi": 0.45
+    },
+    "soil": {
+      "nitrogen": 50,
+      "phosphorus": 40,
+      "potassium": 60,
+      "temperature": 26,
+      "humidity": 65,
+      "ph_value": 6.8,
+      "rainfall": 120
+    }
+  },
+
+  "disease_classes": [
+    "Healthy",
+    "Leaf Curl",
+    "Leaf Spot",
+    "Whitefly",
+    "Yellowish",
+    "Anthracnose"
+  ],
+
+  "disease_simulation": {
+    "top_confidence_range": [0.70, 0.95],
+    "other_confidence_range": [0.01, 0.05]
+  }
+}
